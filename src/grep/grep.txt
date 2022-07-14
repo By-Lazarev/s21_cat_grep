@@ -1,2 +1,0 @@
-test_files/grep_file1
-test_files/grep_file4
