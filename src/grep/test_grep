@@ -1,0 +1,257 @@
+#!/bin/bash
+
+GREEN='\e[32m'
+NC='\e[0m'
+COUNTER_SUCCESS=0
+COUNTER_FAIL=0
+DIFF_RES=""
+TEST_FILE="./test/test.txt"
+TEST_WORD="qwe"
+
+printf "While you are waiting, try to solve 3^5+5^3\n"
+printf "${GREEN}-----RUNNING SIMPLE TESTS-----${NC}\n"
+
+for var in -i -v -c -l -n
+do
+          TEST1="$var $TEST_WORD $TEST_FILE"
+          TEST2="$var -e io -e '[A-Z]' $TEST_FILE"
+          TEST3="$var $TEST_FILE -e '.'"
+          TEST4="$var $TEST_FILE -e 1 -e 2 -e 3"
+          res=`./s21_grep $TEST1`
+          exp=`grep $TEST1`
+          if [ "$exp" = "$res" ]
+            then
+              (( COUNTER_SUCCESS++ ))
+            else
+              echo "$TEST1" >> log.txt
+              (( COUNTER_FAIL++ ))
+          fi
+          res=`./s21_grep $TEST2`
+          exp=`grep $TEST2`
+          if [ "$exp" = "$res" ]
+            then
+              (( COUNTER_SUCCESS++ ))
+            else
+              echo "$TEST2" >> log.txt
+              (( COUNTER_FAIL++ ))
+          fi
+          res=`./s21_grep $TEST3`
+          exp=`grep $TEST3`
+          if [ "$exp" = "$res" ]
+            then
+              (( COUNTER_SUCCESS++ ))
+            else
+              echo "$TEST3" >> log.txt
+              (( COUNTER_FAIL++ ))
+          fi
+          res=`./s21_grep $TEST4`
+          exp=`grep $TEST4`
+          if [ "$exp" = "$res" ]
+            then
+              (( COUNTER_SUCCESS++ ))
+            else
+              echo "$TEST4" >> log.txt
+              (( COUNTER_FAIL++ ))
+          fi
+done
+
+DIFF_RES=""
+FILENAME1="./test/1"
+FILENAME2="./test/2"
+FILENAME3="./test/file"
+FILENAME4="./test/file2"
+FILENAME5="./test/file3"
+
+for var in -v -c -l -n -h -i
+do
+  for var2 in -v -c -l -n -h -i -s
+  do
+      for var3 in -v -c -l -n -h -i -s
+      do
+        if [ $var != $var2 ] && [ $var2 != $var3 ] && [ $var != $var3 ]
+        then
+          TEST1="$var $var2 $var3 $FILENAME1 $FILENAME2 $FILENAME3 $FILENAME4 $FILENAME5"
+          ./s21_grep $TEST1 > s21_grep.txt
+          grep $TEST1 > grep.txt
+          DIFF_RES="$(diff -s s21_grep.txt grep.txt)"
+          if [ "$DIFF_RES" == "Files s21_grep.txt and grep.txt are identical" ]
+            then
+              (( COUNTER_SUCCESS++ ))
+            else
+              echo "$TEST1" >> log.txt
+              (( COUNTER_FAIL++ ))
+          fi
+          rm s21_grep.txt grep.txt
+
+          TEST2="$var $var2 $var3 -e '[0-9]' -e '^$' $FILENAME1 $FILENAME2 $FILENAME3 $FILENAME4 $FILENAME5"
+          ./s21_grep $TEST2 > s21_grep.txt
+          grep $TEST2 > grep.txt
+          DIFF_RES="$(diff -s s21_grep.txt grep.txt)"
+          if [ "$DIFF_RES" == "Files s21_grep.txt and grep.txt are identical" ]
+            then
+              (( COUNTER_SUCCESS++ ))
+            else
+              echo "$TEST2" >> log.txt
+              (( COUNTER_FAIL++ ))
+          fi
+          rm s21_grep.txt grep.txt
+
+          TEST3="$var $var2 $var3 $FILENAME1 $FILENAME2 $FILENAME3 $FILENAME4 $FILENAME5"
+          ./s21_grep $TEST3 > s21_grep.txt
+          grep $TEST3 > grep.txt
+          DIFF_RES="$(diff -s s21_grep.txt grep.txt)"
+          if [ "$DIFF_RES" == "Files s21_grep.txt and grep.txt are identical" ]
+            then
+              (( COUNTER_SUCCESS++ ))
+            else
+              echo "$TEST3" >> log.txt
+              (( COUNTER_FAIL++ ))
+          fi
+          rm s21_grep.txt grep.txt
+
+          TEST4="$var $var2 $var3 $FILENAME1 $FILENAME2 $FILENAME3 $FILENAME4 $FILENAME5"
+          ./s21_grep $TEST4 > s21_grep.txt
+          grep $TEST4 > grep.txt
+          DIFF_RES="$(diff -s s21_grep.txt grep.txt)"
+          if [ "$DIFF_RES" == "Files s21_grep.txt and grep.txt are identical" ]
+            then
+              (( COUNTER_SUCCESS++ ))
+            else
+              echo "$TEST4" >> log.txt
+              (( COUNTER_FAIL++ ))
+          fi
+          rm s21_grep.txt grep.txt
+
+          TEST5="$var $var2 $var3 -f ./test/pattern.txt $FILENAME1 $FILENAME2 $FILENAME3 $FILENAME4 $FILENAME5"
+          ./s21_grep $TEST5 > s21_grep.txt
+          grep $TEST5 > grep.txt
+          DIFF_RES="$(diff -s s21_grep.txt grep.txt)"
+          if [ "$DIFF_RES" == "Files s21_grep.txt and grep.txt are identical" ]
+            then
+              (( COUNTER_SUCCESS++ ))
+            else
+              echo "$TEST5" >> log.txt
+              (( COUNTER_FAIL++ ))
+          fi
+          rm s21_grep.txt grep.txt
+
+          TEST6="$var $var2 $var3 -f ./test/pattern.txt $FILENAME1 $FILENAME2 $FILENAME3 $FILENAME4 $FILENAME5"
+          ./s21_grep $TEST6 > s21_grep.txt
+          grep $TEST6 > grep.txt
+          DIFF_RES="$(diff -s s21_grep.txt grep.txt)"
+          if [ "$DIFF_RES" == "Files s21_grep.txt and grep.txt are identical" ]
+            then
+              (( COUNTER_SUCCESS++ ))
+            else
+              echo "$TEST6" >> log.txt
+              (( COUNTER_FAIL++ ))
+          fi
+          rm s21_grep.txt grep.txt
+
+        fi
+      done
+  done
+done
+
+DIFF_RES=""
+FILENAME1="./test/1.txt"
+FILENAME2="./test/2.txt"
+FILENAME3="./test/3.txt"
+
+
+for var in -v -c -l -n -i
+do
+  for var2 in -v -c -l -n -i
+  do
+      for var3 in -v -c -l -n -i
+      do
+        if [ $var != $var2 ] && [ $var2 != $var3 ] && [ $var != $var3 ]
+        then
+          TEST1="$var $var2 $var3 -e '.' $FILENAME1 $FILENAME2 $FILENAME3"
+          ./s21_grep $TEST1 > s21_grep.txt
+          grep $TEST1 > grep.txt
+          DIFF_RES="$(diff -s s21_grep.txt grep.txt)"
+          if [ "$DIFF_RES" == "Files s21_grep.txt and grep.txt are identical" ]
+            then
+              (( COUNTER_SUCCESS++ ))
+            else
+              echo "$TEST1" >> log.txt
+              (( COUNTER_FAIL++ ))
+          fi
+          rm s21_grep.txt grep.txt
+
+          TEST2="$var $var2 $var3  $FILENAME1 $FILENAME2 $FILENAME3"
+          ./s21_grep $TEST2 > s21_grep.txt
+          grep $TEST2 > grep.txt
+          DIFF_RES="$(diff -s s21_grep.txt grep.txt)"
+          if [ "$DIFF_RES" == "Files s21_grep.txt and grep.txt are identical" ]
+            then
+              (( COUNTER_SUCCESS++ ))
+            else
+              echo "$TEST2" >> log.txt
+              (( COUNTER_FAIL++ ))
+          fi
+          rm s21_grep.txt grep.txt
+
+          TEST3="$var $var2 $var3  $FILENAME1 $FILENAME2 $FILENAME3"
+          ./s21_grep $TEST3 > s21_grep.txt
+          grep $TEST3 > grep.txt
+          DIFF_RES="$(diff -s s21_grep.txt grep.txt)"
+          if [ "$DIFF_RES" == "Files s21_grep.txt and grep.txt are identical" ]
+            then
+              (( COUNTER_SUCCESS++ ))
+            else
+              echo "$TEST3" >> log.txt
+              (( COUNTER_FAIL++ ))
+          fi
+          rm s21_grep.txt grep.txt
+
+          TEST4="$var $var2 $var3  $FILENAME1 $FILENAME2 $FILENAME3"
+          ./s21_grep $TEST4 > s21_grep.txt
+          grep $TEST4 > grep.txt
+          DIFF_RES="$(diff -s s21_grep.txt grep.txt)"
+          if [ "$DIFF_RES" == "Files s21_grep.txt and grep.txt are identical" ]
+            then
+              (( COUNTER_SUCCESS++ ))
+            else
+              echo "$TEST4" >> log.txt
+              (( COUNTER_FAIL++ ))
+          fi
+          rm s21_grep.txt grep.txt
+
+          TEST5="$var $var2 $var3  $FILENAME1 $FILENAME2 $FILENAME3"
+          ./s21_grep $TEST5 > s21_grep.txt
+          grep $TEST5 > grep.txt
+          DIFF_RES="$(diff -s s21_grep.txt grep.txt)"
+          if [ "$DIFF_RES" == "Files s21_grep.txt and grep.txt are identical" ]
+            then
+              (( COUNTER_SUCCESS++ ))
+            else
+              echo "$TEST5" >> log.txt
+              (( COUNTER_FAIL++ ))
+          fi
+          rm s21_grep.txt grep.txt
+
+          TEST6="$var $var2 $var3  $FILENAME1 $FILENAME2 $FILENAME3"
+          ./s21_grep $TEST6 > s21_grep.txt
+          grep $TEST6 > grep.txt
+          DIFF_RES="$(diff -s s21_grep.txt grep.txt)"
+          if [ "$DIFF_RES" == "Files s21_grep.txt and grep.txt are identical" ]
+            then
+              (( COUNTER_SUCCESS++ ))
+            else
+              echo "$TEST6" >> log.txt
+              (( COUNTER_FAIL++ ))
+          fi
+          rm s21_grep.txt grep.txt
+
+        fi
+      done
+  done
+done
+
+
+[ "$COUNTER_FAIL" = 0 ] && echo "100% covered" || echo "$COUNTER_FAIL not passed check log.txt"
+
+echo "SUCCESS: $COUNTER_SUCCESS"
+echo "FAIL: $COUNTER_FAIL"
