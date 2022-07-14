@@ -4,7 +4,7 @@ CFLAGS = -g -Wall -Wextra -Werror
 
 all: clean s21_grep test
 
-test: clean s21_grep cpplint
+test: clean s21_grep cpp
 	./test_grep
 	./t_grep
 	./t_grep_memory
@@ -15,10 +15,11 @@ s21_grep: s21_grep.c
 clean:
 	rm -f *.o *.a *.out *.txt s21_grep
 
-cpplint:
-	cp ../../materials/linters/CPPLINT.cfg ./
-	python3 ../../materials/linters/cpplint.py --extensions=c *.c
+cpp:
+	cp ../CPPLINT.cfg ./
+	python3 ../cpplint.py --extensions=c *.c
 	rm CPPLINT.cfg
+	cppcheck --enable=all s21_grep.c s21_grep.h 
 
 git: 
 	git add .

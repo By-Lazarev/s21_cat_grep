@@ -10,6 +10,7 @@
 #define short_options "e:ivclnhsf:o"
 #define GET getopt_long(argc, argv, short_options, NULL, NULL)
 #define REGEX regexec(&preg, str, 0, &pm, 0)
+#define REG_EXT_NEW REG_EXTENDED|REG_NEWLINE
 
 struct flags {
   int c, e, f, h, i, l, n, o, v, s, zero, many_files, c_counter, l_counter,

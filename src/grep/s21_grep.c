@@ -1,17 +1,5 @@
 #include "s21_grep.h"
 
-/* 
-  FAILED:
-  s21_grep reflect 10_1.file 10_2.file
-  s21_grep -i trulyalya 11.file
-  s21_grep -v s 12.file
-  s21_grep -c s 13.file
-  s21_grep -n s 15.file
-  s21_grep -o 123 16.file
-  s21_grep -h reflect 17_1.file 17_2.file
-  s21_grep -f 19_1.file 19_2.file
-*/
-
 struct flags flag = {0};
 struct grep_char s21_pattern = {0};
 struct grep_char s21_file = {0};
@@ -34,7 +22,7 @@ void flag_finder(int c) {
 
 size_t c_check(int c) {
   size_t res = 0;
-  for (char* str = "cefhilnovs"; str[res] != (char)c; res++) {}
+  for (const char* str = "cefhilnovs"; str[res] != (char)c; res++) {}
   return res;
 }
 
@@ -45,11 +33,11 @@ void pattern_copy(const char* string) {
 void pattern_file_copy(const char* string) {
   FILE* file = fopen(string, "r");
   if (file) {
-    for (char c = getc(file); c != EOF && !feof(file);
+    for (char c = getc(file); /*c !=EOF && */ !feof(file);
          s21_pattern.counter++, c = getc(file)) {
       size_t pos = 0;
       s21_pattern.name[s21_pattern.counter][pos] = c;
-      for (; c != EOF && c != '\n' && !feof(file);
+      for (; /*c !=EOF && */ c != '\n' && !feof(file);
            s21_pattern.name[s21_pattern.counter][pos++] = c, c = getc(file)) {
       }
     }
@@ -72,13 +60,12 @@ void file_hook(const char* file_name) {
 
 void file_printer(FILE* file) {
   char str[500] = "";
-  size_t pos = 0;
   flag.c_counter = flag.l_counter = flag.n_counter = 0;
-  for (char c = getc(file); c != EOF && !feof(file); c = getc(file)) {
+  for (char c = getc(file); /*c !=EOF && */ !feof(file); c = getc(file)) {
     flag.n_counter++;
-    pos = 0;
+    size_t pos = 0;
     str[pos] = c;
-    for (; c != EOF && c != '\n' && !feof(file);
+    for (; /*c !=EOF && */ c != '\n' && !feof(file);
          str[pos++] = c, c = getc(file)) {
     }
     str[pos] = '\0';
@@ -100,8 +87,9 @@ void pattern_exe(char* str) {
   regmatch_t pm = {0};
   for (size_t current_pattern = 0; current_pattern < s21_pattern.counter;
        current_pattern++) {
-    regcomp(&preg, s21_pattern.name[current_pattern],
-            flag.i ? REG_NEWLINE|REG_ICASE|REG_EXTENDED : REG_EXTENDED);
+    if (regcomp(&preg, s21_pattern.name[current_pattern],
+            flag.i ? REG_EXT_NEW|REG_ICASE : REG_EXT_NEW))
+            continue;
 
     if (REGEX == flag.v) res++;
     regfree(&preg);
@@ -123,9 +111,9 @@ void pattern_exe_extra(char* str) {
   regmatch_t  pmatch[1] = {0};
   for (size_t current_pattern = 0; current_pattern < s21_pattern.counter;
         current_pattern++) {
-    regcomp(&preg, s21_pattern.name[current_pattern],
-            flag.i ? REG_NEWLINE|REG_ICASE|REG_EXTENDED : REG_NEWLINE|REG_EXTENDED);
-
+    if (regcomp(&preg, s21_pattern.name[current_pattern],
+          flag.i ? REG_EXT_NEW|REG_ICASE : REG_EXT_NEW))
+          continue;
     while (!regexec(&preg, str, 1, pmatch, 0)) {
       if (first_file++ == 0) print_file_name();
       if (flag.n && first_num++ == 0) printf("%d:", flag.n_counter);
