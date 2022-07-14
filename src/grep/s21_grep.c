@@ -6,7 +6,6 @@ struct grep_char s21_file = {0};
 
 void s21_grep(int argc, char** argv) {
   if (argc < 3) error_printer();
-  s21_pattern.counter = s21_file.counter = 0;
   for (int c = GET; c != -1; c = GET) flag_finder(c);
   if (!flag.e && !flag.f) pattern_copy(argv[optind++]);
   flag.many_files = argc - optind;
@@ -73,20 +72,18 @@ void file_printer(FILE* file) {
     pattern_exe(str);
     if (flag.l_counter == 1) break;
   }
-  if (!flag.zero) printer_add();
+  printer_add();
 }
 
 void pattern_exe(char* str) {
   size_t res = 0, first_file = 0, first_num = 0;
   regmatch_t pmatch[1] = {0};
   regex_t preg = {0};
-  flag.o_counter = 0;
 
-  for (size_t current_pattern = 0; current_pattern < s21_pattern.counter;
-       current_pattern++) {
-    if (regcomp(&preg, s21_pattern.name[current_pattern],
-            flag.i ? REG_EXT_NEW|REG_ICASE : REG_EXT_NEW))
-            continue;
+  for (size_t current = 0; current < s21_pattern.counter; current++) {
+    if (regcomp(&preg, s21_pattern.name[current],
+                flag.i ? REG_EXT_NEW|REG_ICASE : REG_EXT_NEW))
+        continue;
     if (flag.o && NO_FLAGS_L_V_C) {
       while (!regexec(&preg, str, 1, pmatch, 0)) {
         if (first_file++ == 0) print_file_name();
@@ -94,9 +91,8 @@ void pattern_exe(char* str) {
         printf("%.*s\n", (int)(pmatch[0].rm_eo - pmatch[0].rm_so), str + pmatch[0].rm_so);
         str += pmatch[0].rm_eo;
       }
-      flag.zero = 1;
-    } else {
-      if (REGEX == flag.v) res++;
+    } else if (regexec(&preg, str, 0, pmatch, 0) == flag.v) {
+       res++;
     }
     regfree(&preg);
   }
@@ -113,6 +109,7 @@ void pattern_exe(char* str) {
 }
 
 void printer_add() {
+  if (flag.o && NO_FLAGS_L_V_C) return;
   if (flag.c) {
     print_file_name();
     printf("%d\n", flag.c_counter);
