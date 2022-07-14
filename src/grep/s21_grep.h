@@ -7,15 +7,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define short_options "e:ivclnhsf:o"
-#define GET getopt_long(argc, argv, short_options, NULL, NULL)
-#define REGEX regexec(&preg, str, 0, pmatch, 0)
+#define GET getopt_long(argc, argv, "e:ivclnhsf:o", NULL, NULL)
 #define REG_EXT_NEW REG_EXTENDED|REG_NEWLINE
 #define NO_FLAGS_L_V_C !flag.l && !flag.v && !flag.c
 
 struct flags {
-  int c, e, f, h, i, l, n, o, v, s, zero, many_files, c_counter, l_counter,
-      n_counter, o_counter;
+  int c, e, f, h, i, l, n, o, v, s, many_files, c_counter, l_counter,
+      n_counter;
 };
 
 struct grep_char {
