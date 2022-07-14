@@ -13,7 +13,7 @@ s21_grep: s21_grep.c
 	$(CC) $(CFLAGS) $^ -o $@
 
 clean:
-	rm -f *.o *.a *.out *.txt s21_grep
+	rm -f *.o *.a *.out *.txt s21_grep valgrind_result.txt
 
 cpp:
 	cp ../CPPLINT.cfg ./

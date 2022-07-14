@@ -15,12 +15,12 @@ void s21_grep(int argc, char** argv) {
 
 void flag_finder(int c) {
   if (c == '?') error_printer();
-  *(&flag.c + c_check(c)) = 1;
-  if (c == 'e') pattern_copy(optarg);
+  *(&flag.c + flag_num_in_array(c)) = 1;
   if (c == 'f') pattern_file_copy(optarg);
+  if (c == 'e') pattern_copy(optarg);
 }
 
-size_t c_check(int c) {
+size_t flag_num_in_array(int c) {
   size_t res = 0;
   for (const char* str = "cefhilnovs"; str[res] != (char)c; res++) {}
   return res;
@@ -30,20 +30,21 @@ void pattern_copy(const char* string) {
   strcpy(s21_pattern.name[s21_pattern.counter++], string);
 }
 
-void pattern_file_copy(const char* string) {
-  FILE* file = fopen(string, "r");
+void pattern_file_copy(const char* file_name) {
+  FILE* file = fopen(file_name, "r");
   if (file) {
-    for (char c = getc(file); /*c !=EOF && */ !feof(file);
+    for (char c = getc(file); !feof(file);
          s21_pattern.counter++, c = getc(file)) {
       size_t pos = 0;
       s21_pattern.name[s21_pattern.counter][pos] = c;
-      for (; /*c !=EOF && */ c != '\n' && !feof(file);
+      for (;   c != '\n' && !feof(file);
            s21_pattern.name[s21_pattern.counter][pos++] = c, c = getc(file)) {
       }
     }
     fclose(file);
   } else {
-    printf("\n>%s:\tФайл не найден или вы ошиблись при вводе.\n", string);
+    error_no_file_printer(file_name);
+    exit(0);
   }
 }
 
@@ -54,46 +55,52 @@ void file_hook(const char* file_name) {
     file_printer(file);
     fclose(file);
   } else if (!flag.s) {
-    printf("\n>%s:\tФайл не найден или вы ошиблись при вводе.\n", file_name);
+    error_no_file_printer(file_name);
   }
 }
 
 void file_printer(FILE* file) {
   char str[500] = "";
   flag.c_counter = flag.l_counter = flag.n_counter = 0;
-  for (char c = getc(file); /*c !=EOF && */ !feof(file); c = getc(file)) {
+  for (char c = getc(file); !feof(file); c = getc(file)) {
     flag.n_counter++;
     size_t pos = 0;
     str[pos] = c;
-    for (; /*c !=EOF && */ c != '\n' && !feof(file);
+    for (; c != '\n' && !feof(file);
          str[pos++] = c, c = getc(file)) {
     }
     str[pos] = '\0';
-    if (flag.o && !flag.v && !flag.c && !flag.l) {
-      pattern_exe_extra(str);
-      flag.zero = 1;
-    } else {
-      pattern_exe(str);
-    }
+    pattern_exe(str);
     if (flag.l_counter == 1) break;
   }
   if (!flag.zero) printer_add();
 }
 
 void pattern_exe(char* str) {
-  size_t res = 0;
-  flag.o_counter = 0;
+  size_t res = 0, first_file = 0, first_num = 0;
+  regmatch_t pmatch[1] = {0};
   regex_t preg = {0};
-  regmatch_t pm = {0};
+  flag.o_counter = 0;
+
   for (size_t current_pattern = 0; current_pattern < s21_pattern.counter;
        current_pattern++) {
     if (regcomp(&preg, s21_pattern.name[current_pattern],
             flag.i ? REG_EXT_NEW|REG_ICASE : REG_EXT_NEW))
             continue;
-
-    if (REGEX == flag.v) res++;
+    if (flag.o && NO_FLAGS_L_V_C) {
+      while (!regexec(&preg, str, 1, pmatch, 0)) {
+        if (first_file++ == 0) print_file_name();
+        if (flag.n && first_num++ == 0) printf("%d:", flag.n_counter);
+        printf("%.*s\n", (int)(pmatch[0].rm_eo - pmatch[0].rm_so), str + pmatch[0].rm_so);
+        str += pmatch[0].rm_eo;
+      }
+      flag.zero = 1;
+    } else {
+      if (REGEX == flag.v) res++;
+    }
     regfree(&preg);
   }
+
   if (res == s21_pattern.counter || (res && !flag.v)) {
     if (flag.c) flag.c_counter++;
     if (flag.l) flag.l_counter = 1;
@@ -103,25 +110,6 @@ void pattern_exe(char* str) {
       printf("%s\n", str);
     }
   }
-}
-
-void pattern_exe_extra(char* str) {
-  size_t first_file = 0, first_num = 0;
-  regex_t     preg = {0};
-  regmatch_t  pmatch[1] = {0};
-  for (size_t current_pattern = 0; current_pattern < s21_pattern.counter;
-        current_pattern++) {
-    if (regcomp(&preg, s21_pattern.name[current_pattern],
-          flag.i ? REG_EXT_NEW|REG_ICASE : REG_EXT_NEW))
-          continue;
-    while (!regexec(&preg, str, 1, pmatch, 0)) {
-      if (first_file++ == 0) print_file_name();
-      if (flag.n && first_num++ == 0) printf("%d:", flag.n_counter);
-      printf("%.*s\n", (int)(pmatch[0].rm_eo - pmatch[0].rm_so), str + pmatch[0].rm_so);
-      str += pmatch[0].rm_eo;
-    }
-    regfree(&preg);
-    }
 }
 
 void printer_add() {
@@ -142,9 +130,15 @@ void error_printer() {
   system("clear");
   if (!flag.s)
     printf(
-        ">\tПожалуйста укажите файл для запуска. И верно используйте "
-        "флаги\n./s21_grep [-options] [\"pattern\"] [\"file.name\"]");
+        ">\t Usually people know what they're doing, apparently this is not about you."
+        "\n./s21_grep [-options] [\"pattern\"] [\"file.name\"]");
   exit(0);
+}
+
+void error_no_file_printer(const char* file_name) {
+  system("clear");
+  printf("file: %s does not exist, and neither does the meaning of your life",
+                file_name);
 }
 
 int main(int argc, char** argv) {
