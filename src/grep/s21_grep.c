@@ -76,7 +76,7 @@ void file_printer(FILE* file) {
 }
 
 void pattern_exe(char* str) {
-  size_t res = 0, first_file = 0, first_num = 0;
+  size_t res = 0, first_file = 0;
   regmatch_t pmatch[1] = {0};
   regex_t preg = {0};
 
@@ -85,11 +85,13 @@ void pattern_exe(char* str) {
                 flag.i ? REG_EXT_NEW|REG_ICASE : REG_EXT_NEW))
         continue;
     if (flag.o && NO_FLAGS_L_V_C) {
-      while (!regexec(&preg, str, 1, pmatch, 0)) {
-        if (first_file++ == 0) print_file_name();
-        if (flag.n && first_num++ == 0) printf("%d:", flag.n_counter);
-        printf("%.*s\n", (int)(pmatch[0].rm_eo - pmatch[0].rm_so), str + pmatch[0].rm_so);
-        str += pmatch[0].rm_eo;
+      for ( ; !regexec(&preg, str, 1, pmatch, 0); str += pmatch[0].rm_eo) {
+        if (first_file++ == 0) {
+          print_file_name();
+          if (flag.n) printf("%d:", flag.n_counter);
+        }
+        if ((int)pmatch[0].rm_so >= (int)strlen(str)) break;
+        printf("%.*s\n", (int)pmatch[0].rm_eo - (int)pmatch[0].rm_so, str + (int)pmatch[0].rm_so);
       }
     } else if (regexec(&preg, str, 0, pmatch, 0) == flag.v) {
        res++;

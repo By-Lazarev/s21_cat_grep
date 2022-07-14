@@ -18,7 +18,7 @@ struct flags {
 
 struct grep_char {
   size_t counter;
-  char name[500][500];
+  char name[1500][1500];
 };
 
 void error_no_file_printer(const char* file_name);

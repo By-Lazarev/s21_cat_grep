@@ -34,7 +34,7 @@ brew:
 	chmod -R go-w "$(brew --prefix)/bin/brew"
 
 valgrind: s21_grep
-	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose --log-file=RESULT_VALGRIND.txt ./s21_grep -o permission test_files/grep_file1 test_files/grep_file2 test_files/grep_file3 test_files/grep_file4
+	valgrind -s --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose --log-file=RESULT_VALGRIND.txt ./s21_grep -o permission test_files/grep_file1 test_files/grep_file2 test_files/grep_file3 test_files/grep_file4 >> RESULT_VALGRIND.txt
 
 leaks: s21_grep
 	CK_FORK=no leaks --atExit -- ./s21_grep qwe test/1.txt
